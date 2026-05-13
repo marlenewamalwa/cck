@@ -6,7 +6,7 @@ import Footer from '@/components/Footer'
 export const metadata: Metadata = {
   title: 'Closet Culture — Discover Kenyan Fashion Brands',
   description: 'Your ultimate destination for Kenyan fashion, styling, and brand discovery.',
-  icons: { icon: '/favicon.png' },
+  icons: { icon: '/ccklogo.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
