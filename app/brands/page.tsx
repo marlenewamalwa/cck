@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+export const revalidate = 0
+
 async function getBrands(
   search?: string,
   location_type?: string,
