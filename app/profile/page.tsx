@@ -191,6 +191,9 @@ async function deleteAccount() {
                   <Link href={`/brands/${brand.id}`} style={{ padding: '0.5rem 1rem', border: '1px solid rgba(128,7,7,0.25)', borderRadius: 50, fontSize: '0.78rem', color: 'var(--burgundy)', textDecoration: 'none', fontWeight: 500 }}>
                     View
                   </Link>
+                  <Link href={`/edit-brand/${brand.id}`} style={{ padding: '0.5rem 1rem', border: '1px solid rgba(128,7,7,0.25)', borderRadius: 50, fontSize: '0.78rem', color: 'var(--burgundy)', textDecoration: 'none', fontWeight: 500 }}>
+                  Edit
+                  </Link>
                   {deleteConfirm === brand.id ? (
                     <>
                       <button onClick={() => deleteBrand(brand.id)} style={{ padding: '0.5rem 1rem', background: '#b91c1c', color: 'white', border: 'none', borderRadius: 50, fontSize: '0.78rem', cursor: 'pointer', fontWeight: 500 }}>
