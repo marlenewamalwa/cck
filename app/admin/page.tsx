@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-const ADMIN_EMAIL = 'closetculture@gmail.com' // replace with your actual email
+const ADMIN_EMAIL = 'closetcultureke@gmail.com' // replace with your actual email
 
 export default function AdminPage() {
   const router = useRouter()

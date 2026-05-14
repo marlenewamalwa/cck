@@ -61,7 +61,7 @@ export default function Navbar() {
         }}>
           {/* Logo */}
           <Link href="/" style={{
-            fontFamily: 'Agbalumo, cursive',
+            fontFamily: 'Cormorant Garamond, serif',
             fontSize: '30px',
             color: 'var(--burgundy)',
             textDecoration: 'none',
@@ -114,6 +114,8 @@ export default function Navbar() {
               display: 'flex',
               listStyle: 'none',
               gap: '20px',
+              fontFamily: 'Cormorant Garamond, serif',
+              fontSize: '30px',
               margin: 0,
               padding: 0,
             }}>
