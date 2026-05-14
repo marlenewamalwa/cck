@@ -115,12 +115,10 @@ export default function Navbar() {
               listStyle: 'none',
               gap: '20px',
               fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '30px',
               margin: 0,
               padding: 0,
             }}>
               {[
-                { href: '/', label: 'Home' },
                 { href: '/brands', label: 'Brands' },
                 { href: '/stories', label: 'Stories' },
               ].map(({ href, label }) => (

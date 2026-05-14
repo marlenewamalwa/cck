@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
       const { data: brandsData } = await supabase
         .from('brands')
-        .select('id, name, logo, location_type, stock_type')
+        .select('id, name, logo, location_type, stock_type, is_approved')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
       setBrands(brandsData ?? [])
@@ -81,9 +81,7 @@ async function deleteAccount() {
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
           <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Account</span>
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--charcoal)' }}>
-          My Profile
-        </h1>
+
       </div>
 
       {/* Profile card */}
@@ -169,8 +167,23 @@ async function deleteAccount() {
                     {brand.name}
                   </h3>
                   <p style={{ fontSize: '0.78rem', color: 'var(--muted)', textTransform: 'capitalize' as const }}>
-                    {brand.location_type} · {brand.stock_type === 'both' ? 'New & Thrift' : brand.stock_type}
-                  </p>
+  {brand.location_type} · {brand.stock_type === 'both' ? 'New & Thrift' : brand.stock_type}
+</p>
+<span style={{
+  display: 'inline-block',
+  marginTop: '0.3rem',
+  padding: '0.15rem 0.65rem',
+  borderRadius: 50,
+  fontSize: '0.65rem',
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  ...(brand.is_approved
+    ? { background: 'rgba(34,139,34,0.1)', color: '#226b22', border: '1px solid rgba(34,139,34,0.25)' }
+    : { background: 'rgba(180,100,20,0.1)', color: '#8b5a00', border: '1px solid rgba(180,100,20,0.25)' }
+  )
+}}>
+  {brand.is_approved ? 'Approved' : 'Pending Approval'}
+</span>
                 </div>
 
                 {/* Actions */}

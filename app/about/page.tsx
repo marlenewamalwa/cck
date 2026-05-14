@@ -9,9 +9,6 @@ export default function AboutPage() {
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
             <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Our Story</span>
           </div>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
-            About Closet Culture
-          </h1>
           <p style={{ fontSize: '1.15rem', color: 'var(--muted)', lineHeight: 1.8, fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
             A space built for Kenya's fashion community — by someone who's part of it.
           </p>

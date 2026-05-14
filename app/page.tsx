@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import PinterestBoard from '@/components/PinterestBoard'
 
 async function getFeaturedBrands() {
   const { data } = await supabase
     .from('brands')
     .select(`
       id, name, logo,
-      brand_category(category(name))
-    `)
+      brand_category(category(name))`)
     .order('id', { ascending: false })
     .limit(6)
   return data ?? []
@@ -32,7 +32,7 @@ export default async function HomePage() {
         <div style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'url(/closet-hero.jpg)',
+          backgroundImage: 'url(/closet-hero.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: 0,
@@ -132,7 +132,7 @@ export default async function HomePage() {
             textTransform: 'uppercase',
             color: 'var(--burgundy)',
           }}>
-            Featured
+            Featured Brands
           </span>
           <div style={{ flex: 1, height: '1px', background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
@@ -145,27 +145,7 @@ export default async function HomePage() {
           flexWrap: 'wrap',
           gap: '1rem',
         }}>
-          <h2 style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: 'clamp(2rem, 4vw, 3rem)',
-            fontWeight: 700,
-            color: 'var(--charcoal)',
-            lineHeight: 1.1,
-          }}>
-            Brands to Know
-          </h2>
-          <Link href="/brands" style={{
-            fontSize: '0.82rem',
-            color: 'var(--burgundy)',
-            textDecoration: 'none',
-            fontWeight: 500,
-            letterSpacing: '0.05em',
-            borderBottom: '1px solid var(--burgundy)',
-            paddingBottom: '2px',
-            transition: 'var(--transition)',
-          }}>
-            View all brands →
-          </Link>
+
         </div>
 
         {brands.length > 0 ? (
@@ -278,61 +258,25 @@ export default async function HomePage() {
             }}>
               Add Your Brand
             </Link>
+            
           </div>
         )}
       </section>
-
-      {/* ── PINTEREST LOOKBOOK ── */}
-      <section style={{
-        maxWidth: '1200px',
-        margin: '0 auto 5rem',
-        padding: '0 2rem',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          marginBottom: '1rem',
-        }}>
-          <span style={{
-            width: '8px', height: '8px',
-            borderRadius: '50%',
-            background: 'var(--burgundy)',
-            display: 'inline-block',
-          }} />
-          <span style={{
-            fontSize: '0.7rem',
-            fontWeight: 500,
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: 'var(--burgundy)',
-          }}>
-            Lookbook
-          </span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--burgundy)', opacity: 0.2 }} />
-        </div>
-
-        <h2 style={{
-          fontFamily: 'Cormorant Garamond, serif',
-          fontSize: 'clamp(2rem, 4vw, 3rem)',
-          fontWeight: 700,
-          color: 'var(--charcoal)',
-          marginBottom: '2rem',
-        }}>
-          Style Inspiration
-        </h2>
-
+       
         {/* Pinterest widget — same as your original */}
-        <a
-          data-pin-do="embedBoard"
-          data-pin-board-width="800"
-          data-pin-scale-height="400"
-          data-pin-scale-width="80"
-          href="https://www.pinterest.com/ClosetCulture/kenyan-fashion/"
-        />
-        <script async defer src="//assets.pinterest.com/js/pinit.js" />
-      </section>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
+  <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>
+    Lookbook
+  </span>
+  <div style={{ flex: 1, height: '1px', background: 'var(--burgundy)', opacity: 0.2 }} />
+</div>
 
+       <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        
+       <PinterestBoard />
+        </div>
+    
       <style>{`
         .brands-home-grid {
           display: grid;

@@ -47,6 +47,7 @@ export default function BrandsPage() {
         supabase
           .from('brands')
           .select('id, name, logo, location_type, stock_type, brand_category(category(id, name))')
+          .eq('is_approved', true)
           .order('name'),
         supabase.from('category').select('id, name').order('name'),
       ])
@@ -74,12 +75,9 @@ export default function BrandsPage() {
       <div style={{ maxWidth: '1200px', margin: '2.5rem auto 0', padding: '0 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
-          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Discover</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Brand Directory</span>
           <div style={{ flex: 1, height: 1, background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1, marginBottom: '0.5rem' }}>
-          Brand Directory
-        </h1>
         <p style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
           Explore Kenya's finest fashion brands, curated for you.
         </p>
@@ -189,11 +187,7 @@ export default function BrandsPage() {
                           {LOCATION_LABELS[brand.location_type]}
                         </span>
                       )}
-                      {STOCK_LABELS[brand.stock_type] && (
-                        <span style={{ ...STOCK_STYLES[brand.stock_type], padding: '0.22rem 0.55rem', borderRadius: 50, fontSize: '0.63rem', fontWeight: 600 }}>
-                          {STOCK_LABELS[brand.stock_type]}
-                        </span>
-                      )}
+                     
                     </div>
                   </div>
 

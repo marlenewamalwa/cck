@@ -36,9 +36,6 @@ export default function ContactPage() {
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
           <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Get in Touch</span>
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1, marginBottom: '1rem' }}>
-          Contact Us
-        </h1>
         <p style={{ fontSize: '0.95rem', color: 'var(--muted)', lineHeight: 1.7, maxWidth: '500px' }}>
           Have a question, spotted a wrong listing, or just want to say hi? We'd love to hear from you.
         </p>

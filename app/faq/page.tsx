@@ -93,11 +93,9 @@ export default function FAQPage() {
       <div style={{ marginBottom: '3rem', animation: 'fadeUp 0.6s ease both' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
-          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Help</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Frequently Asked Questions</span>
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1, marginBottom: '1rem' }}>
-          Frequently Asked Questions
-        </h1>
+       
         <p style={{ fontSize: '0.95rem', color: 'var(--muted)', lineHeight: 1.7 }}>
           Can't find what you're looking for? <a href="/contact" style={{ color: 'var(--burgundy)', borderBottom: '1px solid var(--burgundy)' }}>Contact us</a>.
         </p>

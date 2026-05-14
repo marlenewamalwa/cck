@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 type Category = { id: number; name: string }
 
@@ -14,6 +15,7 @@ export default function AddBrandPage() {
   const [error, setError] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -102,7 +104,7 @@ export default function AddBrandPage() {
       }))
       await supabase.from('brand_category').insert(catRows)
 
-      router.push(`/brands/${brand.id}`)
+      setSubmitted(true)
     } catch (err: any) {
       setError(err.message || 'Something went wrong.')
       setLoading(false)
@@ -113,6 +115,20 @@ export default function AddBrandPage() {
 
   return (
     <div style={{ maxWidth: '640px', margin: '3rem auto', padding: '0 1.5rem 5rem', animation: 'fadeUp 0.6s ease both' }}>
+{submitted && (
+  <div style={{ maxWidth: '640px', margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' as const, animation: 'fadeUp 0.6s ease both' }}>
+    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
+    <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2.5rem', fontWeight: 700, color: 'var(--charcoal)', marginBottom: '1rem' }}>
+      Brand Submitted!
+    </h1>
+    <p style={{ fontSize: '0.95rem', color: 'var(--muted)', lineHeight: 1.8, marginBottom: '2rem' }}>
+      Your brand has been received and is awaiting approval. We'll review it shortly and it will appear in the directory once approved.
+    </p>
+    <Link href="/brands" style={{ display: 'inline-block', padding: '0.85rem 2rem', background: 'var(--burgundy)', color: 'white', borderRadius: 50, fontSize: '0.85rem', fontWeight: 500, textDecoration: 'none' }}>
+      Browse Brands
+    </Link>
+  </div>
+)}
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
