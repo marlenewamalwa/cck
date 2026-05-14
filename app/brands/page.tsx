@@ -1,58 +1,77 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-export const revalidate = 0
+const LOCATIONS = [
+  { value: '', label: 'All' },
+  { value: 'physical', label: 'Physical' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'online', label: 'Online Only' },
+]
 
-async function getBrands(
-  search?: string,
-  location_type?: string,
-  stock_type?: string,
-  category?: string
-) {
-  const { data, error } = await supabase
-    .from('brands')
-    .select('*')
-
-  console.log('DATA:', data)
-  console.log('ERROR:', error)
-
-  return data ?? []
-}
-async function getCategories() {
-  const { data } = await supabase.from('category').select('id, name').order('name')
-  return data ?? []
-}
-
-const LOCATION_LABELS: Record<string, string> = {
-  physical: 'Physical',
-  hybrid: 'Hybrid',
-  online: 'Online Only',
-}
+const STOCKS = [
+  { value: '', label: 'All' },
+  { value: 'new', label: 'New' },
+  { value: 'thrift', label: 'Thrift' },
+  { value: 'both', label: 'New & Thrift' },
+]
 
 const STOCK_STYLES: Record<string, React.CSSProperties> = {
   new:    { background: 'rgba(34,139,34,0.12)',  color: '#226b22', border: '1px solid rgba(34,139,34,0.25)' },
   thrift: { background: 'rgba(180,100,20,0.12)', color: '#8b5a00', border: '1px solid rgba(180,100,20,0.25)' },
-  both:   { background: 'rgba(128,7,7,0.09)',    color: 'var(--burgundy)', border: '1px solid rgba(128,7,7,0.2)' },
+  both:   { background: 'rgba(128,7,7,0.09)',    color: '#800707', border: '1px solid rgba(128,7,7,0.2)' },
 }
 
 const STOCK_LABELS: Record<string, string> = {
   new: 'New', thrift: 'Thrift', both: 'New & Thrift',
 }
 
-export default async function BrandsPage({
-  searchParams,
-}: {
-  searchParams: { category?: string; search?: string; location_type?: string; stock_type?: string }
-}) {
-  const [brands, categories] = await Promise.all([
-    getBrands(searchParams.search, searchParams.location_type, searchParams.stock_type, searchParams.category),
-    getCategories(),
-  ])
+const LOCATION_LABELS: Record<string, string> = {
+  physical: 'Physical', hybrid: 'Hybrid', online: 'Online Only',
+}
+
+export default function BrandsPage() {
+  const [allBrands, setAllBrands] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [location, setLocation] = useState('')
+  const [stock, setStock] = useState('')
+  const [category, setCategory] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      const [{ data: brands }, { data: cats }] = await Promise.all([
+        supabase
+          .from('brands')
+          .select('id, name, logo, location_type, stock_type, brand_category(category(id, name))')
+          .order('name'),
+        supabase.from('category').select('id, name').order('name'),
+      ])
+      setAllBrands(brands ?? [])
+      setCategories(cats ?? [])
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const filtered = allBrands.filter(brand => {
+    if (search && !brand.name.toLowerCase().includes(search.toLowerCase())) return false
+    if (location && brand.location_type !== location) return false
+    if (stock && brand.stock_type !== stock) return false
+    if (category) {
+      const catIds = brand.brand_category?.map((bc: any) => String(bc.category?.id)) ?? []
+      if (!catIds.includes(category)) return false
+    }
+    return true
+  })
 
   return (
     <>
       {/* PAGE HEADER */}
-      <div style={{ maxWidth: '1200px', margin: '2.5rem auto 0', padding: '0 2rem', animation: 'fadeUp 0.6s ease both' }}>
+      <div style={{ maxWidth: '1200px', margin: '2.5rem auto 0', padding: '0 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
           <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Discover</span>
@@ -66,69 +85,73 @@ export default async function BrandsPage({
         </p>
       </div>
 
-      {/* FILTER BAR */}
+      {/* FILTERS */}
       <div style={{ maxWidth: '1200px', margin: '2rem auto 0', padding: '0 2rem' }}>
-        <form method="GET" action="/brands">
-          <div style={{ background: 'var(--white)', border: '1px solid rgba(128,7,7,0.1)', borderRadius: 14, padding: '1.2rem 1.5rem', boxShadow: '0 2px 16px rgba(128,7,7,0.05)' }}>
+        <div style={{ background: 'var(--white)', border: '1px solid rgba(128,7,7,0.1)', borderRadius: 14, padding: '1.2rem 1.5rem', boxShadow: '0 2px 16px rgba(128,7,7,0.05)' }}>
 
-            {/* Row 1 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <select name="category" defaultValue={searchParams.category ?? ''} style={selectStyle}>
-                <option value="">All Categories</option>
-                {categories.map((c: any) => (
-                  <option key={c.id} value={String(c.id)}>{c.name}</option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                name="search"
-                defaultValue={searchParams.search ?? ''}
-                placeholder="Search brand name…"
-                style={{ ...selectStyle, flex: 1, minWidth: 160, backgroundImage: 'none' }}
-              />
-
-              <button type="submit" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.4rem', background: 'var(--burgundy)', color: 'white', border: 'none', borderRadius: 50, fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' as const }}>
-                Search
+          {/* Row 1 — search + category */}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' as const, marginBottom: '1rem' }}>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search brands…"
+              style={{ flex: 1, minWidth: 180, padding: '0.6rem 1rem', border: '1.5px solid rgba(128,7,7,0.2)', borderRadius: 50, fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'var(--charcoal)', background: 'var(--cream)', outline: 'none' }}
+            />
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              style={{ padding: '0.6rem 1rem', border: '1.5px solid rgba(128,7,7,0.2)', borderRadius: 50, fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'var(--charcoal)', background: 'var(--cream)', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">All Categories</option>
+              {categories.map((c: any) => (
+                <option key={c.id} value={String(c.id)}>{c.name}</option>
+              ))}
+            </select>
+            {(search || location || stock || category) && (
+              <button
+                onClick={() => { setSearch(''); setLocation(''); setStock(''); setCategory('') }}
+                style={{ padding: '0.6rem 1rem', background: 'none', color: 'var(--muted)', border: '1px solid rgba(128,7,7,0.15)', borderRadius: 50, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+              >
+                Clear ✕
               </button>
-
-              {(searchParams.search || searchParams.category || searchParams.location_type || searchParams.stock_type) && (
-                <a href="/brands" style={{ fontSize: '0.8rem', color: 'var(--muted)', padding: '0.5rem 0.8rem', borderRadius: 50, textDecoration: 'none' }}>
-                  Clear ✕
-                </a>
-              )}
-            </div>
-
-            {/* Row 2 — pills */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                <span style={pillLabel}>Location:</span>
-                {[['', 'All'], ['physical', '📍 Physical'], ['hybrid', '🔀 Hybrid'], ['online', '🌐 Online Only']].map(([val, lbl]) => (
-                  <label key={val} style={{ ...pill, ...((searchParams.location_type ?? '') === val ? pillActive : {}) }}>
-                    <input type="radio" name="location_type" value={val} defaultChecked={(searchParams.location_type ?? '') === val} style={{ display: 'none' }} />
-                    {lbl}
-                  </label>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                <span style={pillLabel}>Stock:</span>
-                {[['', 'All'], ['new', 'New'], ['thrift', 'Thrift'], ['both', 'New & Thrift']].map(([val, lbl]) => (
-                  <label key={val} style={{ ...pill, ...((searchParams.stock_type ?? '') === val ? pillActive : {}) }}>
-                    <input type="radio" name="stock_type" value={val} defaultChecked={(searchParams.stock_type ?? '') === val} style={{ display: 'none' }} />
-                    {lbl}
-                  </label>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
-        </form>
+
+          {/* Row 2 — location pills */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' as const, marginBottom: '0.6rem' }}>
+            <span style={pillLabelStyle}>Location:</span>
+            {LOCATIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setLocation(value)}
+                style={{ ...pillStyle, ...(location === value ? pillActiveStyle : {}) }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Row 3 — stock pills */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' as const }}>
+            <span style={pillLabelStyle}>Stock:</span>
+            {STOCKS.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setStock(value)}
+                style={{ ...pillStyle, ...(stock === value ? pillActiveStyle : {}) }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* RESULTS */}
+      {/* RESULTS COUNT */}
       <div style={{ maxWidth: '1200px', margin: '1.5rem auto 0', padding: '0 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-          Showing <strong style={{ color: 'var(--burgundy)' }}>{brands.length}</strong> brand{brands.length !== 1 ? 's' : ''}
+          Showing <strong style={{ color: 'var(--burgundy)' }}>{filtered.length}</strong> brand{filtered.length !== 1 ? 's' : ''}
         </span>
         <Link href="/add-brand" style={{ fontSize: '0.82rem', color: 'var(--burgundy)', fontWeight: 500, borderBottom: '1px solid var(--burgundy)', textDecoration: 'none' }}>
           + Add your brand
@@ -136,10 +159,14 @@ export default async function BrandsPage({
       </div>
 
       {/* GRID */}
-      <div style={{ maxWidth: '1200px', margin: '1.5rem auto', padding: '0 2rem 4rem' }}>
-        {brands.length > 0 ? (
+      <div style={{ maxWidth: '1200px', margin: '1.5rem auto', padding: '0 2rem 5rem' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center' as const, padding: '5rem 2rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
+            Loading brands…
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="brands-grid">
-            {brands.map((brand: any, i: number) => {
+            {filtered.map((brand: any, i: number) => {
               const cats = brand.brand_category?.map((bc: any) => bc.category?.name).filter(Boolean) ?? []
               return (
                 <div key={brand.id} className="brand-card" style={{ animationDelay: `${Math.min(i, 7) * 0.04}s` }}>
@@ -174,7 +201,7 @@ export default async function BrandsPage({
                     <h3 className="brand-name" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 700, color: 'var(--charcoal)', marginBottom: '0.4rem', transition: 'color 0.25s' }}>
                       {brand.name}
                     </h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.1rem', flex: 1 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '0.35rem', marginBottom: '1.1rem', flex: 1 }}>
                       {cats.map((cat: string) => (
                         <span key={cat} style={{ background: 'var(--burgundy-mist)', color: 'var(--burgundy)', padding: '0.18rem 0.65rem', borderRadius: 50, fontSize: '0.68rem', fontWeight: 500 }}>
                           {cat}
@@ -190,12 +217,12 @@ export default async function BrandsPage({
             })}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+          <div style={{ textAlign: 'center' as const, padding: '5rem 2rem' }}>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', color: 'var(--burgundy)', fontSize: '2rem', marginBottom: '0.7rem' }}>No Brands Found</h2>
-            <p style={{ color: 'var(--muted)' }}>Try adjusting your filters or search term.</p>
-            <a href="/brands" style={{ display: 'inline-block', marginTop: '1.5rem', padding: '0.7rem 1.8rem', background: 'var(--burgundy)', color: 'white', borderRadius: 50, textDecoration: 'none', fontSize: '0.85rem' }}>
-              View All Brands
-            </a>
+            <p style={{ color: 'var(--muted)' }}>Try adjusting your filters.</p>
+            <button onClick={() => { setSearch(''); setLocation(''); setStock(''); setCategory('') }} style={{ display: 'inline-block', marginTop: '1.5rem', padding: '0.7rem 1.8rem', background: 'var(--burgundy)', color: 'white', borderRadius: 50, border: 'none', fontSize: '0.85rem', cursor: 'pointer' }}>
+              Clear Filters
+            </button>
           </div>
         )}
       </div>
@@ -207,6 +234,7 @@ export default async function BrandsPage({
         .brand-card:hover .brand-img { transform: scale(1.05); }
         .brand-card:hover .brand-name { color: var(--burgundy); }
         .brand-view-btn:hover { background: var(--burgundy) !important; color: white !important; border-color: var(--burgundy) !important; }
+        input:focus, select:focus { border-color: var(--burgundy) !important; }
         @media (max-width: 1024px) { .brands-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 768px) { .brands-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 480px) { .brands-grid { grid-template-columns: 1fr; } }
@@ -215,21 +243,16 @@ export default async function BrandsPage({
   )
 }
 
-const selectStyle: React.CSSProperties = {
-  padding: '0.6rem 1rem', border: '1.5px solid rgba(128,7,7,0.2)',
-  borderRadius: 50, fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem',
-  color: 'var(--charcoal)', background: 'var(--cream)', outline: 'none',
-}
-const pillLabel: React.CSSProperties = {
+const pillLabelStyle: React.CSSProperties = {
   fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.08em',
   textTransform: 'uppercase', color: 'var(--muted)', whiteSpace: 'nowrap',
 }
-const pill: React.CSSProperties = {
-  display: 'inline-block', padding: '0.3rem 0.85rem',
-  border: '1.5px solid rgba(128,7,7,0.22)', borderRadius: 50,
-  fontSize: '0.78rem', fontWeight: 500, color: 'var(--muted)',
-  cursor: 'pointer', background: 'var(--cream)', userSelect: 'none', whiteSpace: 'nowrap',
+const pillStyle: React.CSSProperties = {
+  padding: '0.3rem 0.85rem', border: '1.5px solid rgba(128,7,7,0.22)',
+  borderRadius: 50, fontSize: '0.78rem', fontWeight: 500,
+  color: 'var(--muted)', cursor: 'pointer', background: 'var(--cream)',
+  fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s',
 }
-const pillActive: React.CSSProperties = {
+const pillActiveStyle: React.CSSProperties = {
   background: 'var(--burgundy)', color: 'white', borderColor: 'var(--burgundy)',
 }
