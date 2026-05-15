@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import FeaturedButton from '@/components/FeaturedButton'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -32,7 +33,7 @@ export default function ProfilePage() {
 
       const { data: brandsData } = await supabase
         .from('brands')
-        .select('id, name, logo, location_type, stock_type, is_approved')
+        .select('id, name, logo, location_type, stock_type, is_approved, is_featured')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
       setBrands(brandsData ?? [])
@@ -93,6 +94,7 @@ async function deleteAccount() {
               {initials}
             </span>
           </div>
+          
 
           <div style={{ flex: 1 }}>
             {editing ? (
@@ -142,6 +144,7 @@ async function deleteAccount() {
               List Your First Brand
             </Link>
           </div>
+          
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {brands.map((brand) => (
@@ -188,6 +191,7 @@ async function deleteAccount() {
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                  <FeaturedButton brandId={brand.id} isFeatured={brand.is_featured ?? false} />
                   <Link href={`/brands/${brand.id}`} style={{ padding: '0.5rem 1rem', border: '1px solid rgba(128,7,7,0.25)', borderRadius: 50, fontSize: '0.78rem', color: 'var(--burgundy)', textDecoration: 'none', fontWeight: 500 }}>
                     View
                   </Link>
