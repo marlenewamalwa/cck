@@ -24,6 +24,11 @@ export default function AdminPage() {
     content: '',
     category: 'Post',
   })
+  const formattedContent = form.content
+  .split('\n\n')
+  .filter(p => p.trim())
+  .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+  .join('')
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -85,21 +90,21 @@ export default function AdminPage() {
     }
 
     if (view === 'edit' && editPost) {
-      await supabase.from('posts').update({
-        title: form.title,
-        excerpt: form.excerpt,
-        content: form.content,
-        category: form.category,
-        ...(imagePath ? { image: imagePath } : {}),
-      }).eq('id', editPost.id)
+     await supabase.from('posts').update({
+  title: form.title,
+  excerpt: form.excerpt,
+  content: formattedContent,
+  category: form.category,
+  image: imagePath,
+}).eq('id', editPost.id)
     } else {
       await supabase.from('posts').insert({
-        title: form.title,
-        excerpt: form.excerpt,
-        content: form.content,
-        category: form.category,
-        image: imagePath,
-      })
+  title: form.title,
+  excerpt: form.excerpt,
+  content: formattedContent,
+  category: form.category,
+  image: imagePath,
+})
     }
 
     await fetchPosts()
