@@ -27,5 +27,5 @@ export default function PinterestBoard() {
     }
   }, [])
 
-  return <div ref={ref} style={{ width: '900px', maxWidth: '100%', minHeight: '140px' }} />
+  return <div ref={ref} style={{ width: '900px', maxWidth: '100%', minHeight: '20px' }} />
 }
