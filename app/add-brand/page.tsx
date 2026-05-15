@@ -105,6 +105,8 @@ export default function AddBrandPage() {
       await supabase.from('brand_category').insert(catRows)
 
       setSubmitted(true)
+window.scrollTo({ top: 0, behavior: 'smooth' })
+setLoading(false)
     } catch (err: any) {
       setError(err.message || 'Something went wrong.')
       setLoading(false)
