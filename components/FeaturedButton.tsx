@@ -142,7 +142,7 @@ export default function FeaturedButton({ brandId, isFeatured }: { brandId: numbe
                   </button>
 
                   <p style={{ fontSize: '0.75rem', color: 'var(--muted)', lineHeight: 1.6, textAlign: 'center' as const }}>
-                    Didn't receive a prompt? Send <strong>KES 500</strong> to Till <strong>3393634</strong> · reference: your brand name · then email <a href="mailto:hello@closetculture.co.ke" style={{ color: 'var(--burgundy)' }}>hello@closetculture.co.ke</a>
+                    Didn't receive a prompt? Send <strong>KES 500</strong> to Till <strong>3393634</strong> · Recipient Name: <strong>Marlene Wamalwa</strong>
                   </p>
                 </>
               )}

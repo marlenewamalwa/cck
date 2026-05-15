@@ -69,9 +69,13 @@ export default function AdminPage() {
   }
 
   async function handleSave() {
-    if (!form.title.trim() || !form.content.trim()) return
-    setSaving(true)
-
+  if (!form.title.trim() || !form.content.trim()) {
+    console.log('Title or content empty')
+    return
+  }
+  setSaving(true)
+  console.log('Saving post...')
+  
     let imagePath = editPost?.image ?? ''
     if (imageFile) {
       const ext = imageFile.name.split('.').pop()

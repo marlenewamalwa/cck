@@ -57,11 +57,23 @@ export default function EditBrandPage({ params }: { params: { id: string } }) {
   }, [brandId, router])
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setLogoFile(file)
-    setLogoPreview(URL.createObjectURL(file))
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  if (file.size > 2 * 1024 * 1024) {
+    setError('Logo must be under 2MB. Please compress your image and try again.')
+    return
   }
+
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowed.includes(file.type)) {
+    setError('Only JPG, PNG, GIF or WebP images are allowed.')
+    return
+  }
+
+  setLogoFile(file)
+  setLogoPreview(URL.createObjectURL(file))
+}
 
   function toggleCategory(id: number) {
     setForm(prev => ({

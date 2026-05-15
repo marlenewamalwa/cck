@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import PinterestBoard from '@/components/PinterestBoard'
 import FeaturedBrands from '@/components/FeaturedBrands'
+import FeaturedStories from '@/components/FeaturedStories'
 
 async function getFeaturedBrands() {
   const { data } = await supabase

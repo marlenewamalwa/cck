@@ -42,11 +42,23 @@ export default function AddBrandPage() {
   }, [])
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setLogoFile(file)
-    setLogoPreview(URL.createObjectURL(file))
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  if (file.size > 2 * 1024 * 1024) {
+    setError('Logo must be under 2MB. Please compress your image and try again.')
+    return
   }
+
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowed.includes(file.type)) {
+    setError('Only JPG, PNG, GIF or WebP images are allowed.')
+    return
+  }
+
+  setLogoFile(file)
+  setLogoPreview(URL.createObjectURL(file))
+}
 
   function toggleCategory(id: number) {
     setForm(prev => ({
@@ -119,7 +131,6 @@ setLoading(false)
     <div style={{ maxWidth: '640px', margin: '3rem auto', padding: '0 1.5rem 5rem', animation: 'fadeUp 0.6s ease both' }}>
 {submitted && (
   <div style={{ maxWidth: '640px', margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' as const, animation: 'fadeUp 0.6s ease both' }}>
-    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
     <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2.5rem', fontWeight: 700, color: 'var(--charcoal)', marginBottom: '1rem' }}>
       Brand Submitted!
     </h1>
