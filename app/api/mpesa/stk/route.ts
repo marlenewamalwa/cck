@@ -15,33 +15,54 @@ async function getAccessToken() {
     'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
     { headers: { Authorization: `Basic ${auth}` } }
   )
-  const data = await res.json()
+  const text = await res.text()
+  console.log('AUTH RESPONSE:', text)
+  const data = JSON.parse(text)
   return data.access_token
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { phone, brand_id, amount = 500 } = await req.json()
+    const { phone, brand_id, amount = 1 } = await req.json()
 
     if (!phone || !brand_id) {
-      return NextResponse.json({ error: 'Phone and brand_id are required' }, { status: 400 })
+      return NextResponse.json({ error: 'Phone and brand_id required' }, { status: 400 })
     }
 
-    // Format phone — convert 07XX to 2547XX
-    const formattedPhone = phone.startsWith('0')
-      ? '254' + phone.slice(1)
-      : phone.startsWith('+')
-      ? phone.slice(1)
-      : phone
+    // Format phone to 2547XXXXXXXX
+    let formattedPhone = phone.replace(/\s/g, '')
+    if (formattedPhone.startsWith('+')) formattedPhone = formattedPhone.slice(1)
+    if (formattedPhone.startsWith('0')) formattedPhone = '254' + formattedPhone.slice(1)
 
     const accessToken = await getAccessToken()
-    const shortcode = process.env.MPESA_SHORTCODE!
+    const shortcode = '174379' // sandbox shortcode always
     const passkey = process.env.MPESA_PASSKEY!
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/[-T:.Z]/g, '')
-      .slice(0, 14)
+
+    const now = new Date()
+    const timestamp = now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0')
+
     const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64')
+
+    const payload = {
+      BusinessShortCode: shortcode,
+      Password: password,
+      Timestamp: timestamp,
+      TransactionType: 'CustomerPayBillOnline',
+      Amount: amount,
+      PartyA: formattedPhone,
+      PartyB: shortcode,
+      PhoneNumber: formattedPhone,
+      CallBackURL: process.env.MPESA_CALLBACK_URL,
+      AccountReference: 'ClosetCulture',
+      TransactionDesc: 'Featured Listing',
+    }
+
+    console.log('STK PAYLOAD:', JSON.stringify(payload))
 
     const stkRes = await fetch(
       'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
@@ -51,26 +72,15 @@ export async function POST(req: NextRequest) {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          BusinessShortCode: shortcode,
-          Password: password,
-          Timestamp: timestamp,
-          TransactionType: 'CustomerBuyGoodsOnline',
-          Amount: amount,
-          PartyA: formattedPhone,
-          PartyB: shortcode,
-          PhoneNumber: formattedPhone,
-          CallBackURL: process.env.MPESA_CALLBACK_URL,
-          AccountReference: `ClosetCulture-${brand_id}`,
-          TransactionDesc: 'Featured Listing - Closet Culture',
-        }),
+        body: JSON.stringify(payload),
       }
     )
 
-    const stkData = await stkRes.json()
+    const text = await stkRes.text()
+    console.log('STK RESPONSE:', text)
+    const stkData = JSON.parse(text)
 
     if (stkData.ResponseCode === '0') {
-      // Save pending payment to Supabase
       await supabase.from('payments').insert({
         brand_id,
         phone: formattedPhone,
@@ -80,9 +90,10 @@ export async function POST(req: NextRequest) {
       })
       return NextResponse.json({ success: true, checkoutRequestId: stkData.CheckoutRequestID })
     } else {
-      return NextResponse.json({ error: stkData.errorMessage || 'STK push failed' }, { status: 400 })
+      return NextResponse.json({ error: stkData.errorMessage || stkData.ResponseDescription || 'STK push failed' }, { status: 400 })
     }
   } catch (err: any) {
+    console.log('STK ERROR:', err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
