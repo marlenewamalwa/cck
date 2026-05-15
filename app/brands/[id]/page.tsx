@@ -69,7 +69,7 @@ export default async function BrandPage({ params }: { params: { id: string } }) 
 
           <div style={{ padding: '0 2.5rem 2.5rem' }}>
             {/* Logo */}
-            <div style={{ width: 110, height: 110, borderRadius: 12, border: '3px solid white', background: 'var(--cream)', overflow: 'hidden', marginTop: -55, marginBottom: '1.2rem', boxShadow: '0 4px 20px rgba(128,7,7,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 110, height: 110, borderRadius: 12, border: '3px solid white', background: 'var(--cream)', overflow: 'hidden', marginTop: '1.2rem', marginBottom: '1.2rem', boxShadow: '0 4px 20px rgba(128,7,7,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {brand.logo ? (
                 <img
                   src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/logos/${brand.logo}`}

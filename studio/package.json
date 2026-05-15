@@ -1,0 +1,18 @@
+{
+  "name": "closetculture-studio",
+  "version": "1.0.0",
+  "description": "Sanity Studio for Closet Culture",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@sanity/vision": "^5.25.1",
+    "sanity": "^5.25.1",
+    "styled-components": "^6.4.1"
+  }
+}

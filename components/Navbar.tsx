@@ -118,22 +118,23 @@ export default function Navbar() {
               margin: 0,
               padding: 0,
             }}>
-              {[
-                { href: '/brands', label: 'Brands' },
-                { href: '/stories', label: 'Stories' },
-              ].map(({ href, label }) => (
-                <li key={href}>
-                  <Link href={href} style={{
-                    textDecoration: 'none',
-                    fontSize: '1rem',
-                    color: pathname === href ? 'var(--burgundy)' : '#333',
-                    fontWeight: pathname === href ? '500' : '400',
-                    transition: 'color 0.3s',
-                  }}>
-                    {label}
-                  </Link>
-                </li>
-              ))}
+             {[
+  { href: '/brands', label: 'Brands' },
+  { href: '/stories', label: 'Stories' },
+].map(({ href, label }) => (
+  <li key={href}>
+    <Link href={href} style={{
+      fontSize: '1rem', // increase from whatever it is
+      color: pathname === href ? 'var(--burgundy)' : '#333',
+      fontWeight: pathname === href ? '500' : '400',
+      transition: 'color 0.3s',
+      textDecoration: 'none',
+      letterSpacing: '0.03em',
+    }}>
+      {label}
+    </Link>
+  </li>
+))}
             </ul>
           </nav>
 

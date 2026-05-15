@@ -1,14 +1,20 @@
-import { supabase } from '@/lib/supabase'
+import { sanityClient, urlFor } from '@/lib/sanity'
 import Link from 'next/link'
 
-export const revalidate = 0
+export const revalidate = 60
 
 async function getPosts() {
-  const { data } = await supabase
-    .from('posts')
-    .select('id, title, excerpt, image, category, created_at')
-    .order('created_at', { ascending: false })
-  return data ?? []
+  return await sanityClient.fetch(`
+    *[_type == "post"] | order(publishedAt desc) {
+      _id,
+      title,
+      excerpt,
+      category,
+      publishedAt,
+      slug,
+      coverImage
+    }
+  `)
 }
 
 export default async function StoriesPage() {
@@ -21,10 +27,13 @@ export default async function StoriesPage() {
       <div style={{ maxWidth: '1200px', margin: '2.5rem auto 0', padding: '0 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
-          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Community Stories</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Stories</span>
           <div style={{ flex: 1, height: 1, background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap' as const, gap: '1rem' }}>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1 }}>
+            Fashion Stories
+          </h1>
         </div>
       </div>
 
@@ -37,12 +46,12 @@ export default async function StoriesPage() {
 
           {/* Featured post */}
           {featured && (
-            <Link href={`/stories/${featured.id}`} style={{ textDecoration: 'none', display: 'block', marginBottom: '3rem' }}>
+            <Link href={`/stories/${featured.slug?.current}`} style={{ textDecoration: 'none', display: 'block', marginBottom: '3rem' }}>
               <div className="featured-card">
                 <div className="featured-image">
-                  {featured.image ? (
+                  {featured.coverImage ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${featured.image}`}
+                      src={urlFor(featured.coverImage)}
                       alt={featured.title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                       className="featured-img"
@@ -64,7 +73,7 @@ export default async function StoriesPage() {
                       </p>
                     )}
                     <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.8rem' }}>
-                      {new Date(featured.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {featured.publishedAt ? new Date(featured.publishedAt).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                     </p>
                   </div>
                 </div>
@@ -76,12 +85,12 @@ export default async function StoriesPage() {
           {rest.length > 0 && (
             <div className="posts-grid">
               {rest.map((post: any, i: number) => (
-                <Link key={post.id} href={`/stories/${post.id}`} style={{ textDecoration: 'none' }}>
+                <Link key={post._id} href={`/stories/${post.slug?.current}`} style={{ textDecoration: 'none' }}>
                   <div className="post-card" style={{ animationDelay: `${i * 0.05}s` }}>
                     <div style={{ height: 200, overflow: 'hidden', background: 'var(--cream-dark)', position: 'relative' }}>
-                      {post.image ? (
+                      {post.coverImage ? (
                         <img
-                          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${post.image}`}
+                          src={urlFor(post.coverImage)}
                           alt={post.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                           className="post-img"
@@ -103,7 +112,7 @@ export default async function StoriesPage() {
                         </p>
                       )}
                       <p style={{ fontSize: '0.72rem', color: 'rgba(122,106,106,0.6)', letterSpacing: '0.04em' }}>
-                        {new Date(post.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
                       </p>
                     </div>
                   </div>
