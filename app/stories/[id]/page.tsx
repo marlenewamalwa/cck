@@ -1,30 +1,76 @@
-import { supabase } from '@/lib/supabase'
+import { sanityClient, urlFor } from '@/lib/sanity'
 import Link from 'next/link'
 
-export const revalidate = 0
+export const revalidate = 60
+
+async function getPost(slug: string) {
+  return await sanityClient.fetch(`
+    *[_type == "post" && slug.current == $slug][0] {
+      _id,
+      title,
+      excerpt,
+      category,
+      publishedAt,
+      coverImage,
+      body
+    }
+  `, { slug })
+}
+
+async function getRelated(slug: string, category: string) {
+  return await sanityClient.fetch(`
+    *[_type == "post" && slug.current != $slug && category == $category] | order(publishedAt desc)[0...3] {
+      _id,
+      title,
+      category,
+      publishedAt,
+      slug,
+      coverImage
+    }
+  `, { slug, category })
+}
+
+function renderBody(body: any[]) {
+  if (!body) return null
+  return body.map((block: any, i: number) => {
+    if (block._type === 'image') {
+      return (
+        <img
+          key={i}
+          src={urlFor(block)}
+          alt=""
+          style={{ width: '100%', borderRadius: 10, margin: '1.5rem 0' }}
+        />
+      )
+    }
+    if (block._type !== 'block') return null
+
+    const text = block.children?.map((child: any) => {
+      let content = child.text
+      if (child.marks?.includes('strong')) content = <strong key={child._key}>{content}</strong>
+      if (child.marks?.includes('em')) content = <em key={child._key}>{content}</em>
+      return content
+    })
+
+    const style = block.style || 'normal'
+    if (style === 'h2') return <h2 key={i} style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: 'var(--charcoal)', margin: '2rem 0 1rem' }}>{text}</h2>
+    if (style === 'h3') return <h3 key={i} style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 700, color: 'var(--charcoal)', margin: '1.5rem 0 0.75rem' }}>{text}</h3>
+    if (style === 'blockquote') return <blockquote key={i} style={{ borderLeft: '3px solid var(--burgundy)', paddingLeft: '1.2rem', fontStyle: 'italic', color: 'var(--muted)', margin: '1.5rem 0' }}>{text}</blockquote>
+    return <p key={i} style={{ marginBottom: '1.4rem', lineHeight: 1.85 }}>{text}</p>
+  })
+}
 
 export default async function StoryPage({ params }: { params: { id: string } }) {
-  const id = Number(params.id)
+  const post = await getPost(params.id)
 
-  const { data: post, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (error || !post) return (
+  if (!post) return (
     <div style={{ textAlign: 'center' as const, padding: '6rem 2rem' }}>
       <p style={{ color: 'var(--muted)' }}>Post not found.</p>
       <Link href="/stories" style={{ color: 'var(--burgundy)', marginTop: '1rem', display: 'inline-block' }}>← Back to Stories</Link>
     </div>
   )
 
-  const { data: related } = await supabase
-    .from('posts')
-    .select('id, title, image, category, created_at')
-    .eq('category', post.category)
-    .neq('id', id)
-    .limit(3)
+  const related = await getRelated(params.id, post.category)
 
   return (
     <>
@@ -34,47 +80,40 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
           ← Back to Stories
         </Link>
 
-        {/* Category + date */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.2rem' }}>
           <span style={{ background: 'var(--burgundy)', color: 'white', padding: '0.25rem 0.85rem', borderRadius: 50, fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.08em' }}>
             {post.category}
           </span>
           <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
-            {new Date(post.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
           </span>
         </div>
 
-        {/* Title */}
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.15, marginBottom: '1.2rem' }}>
           {post.title}
         </h1>
 
-        {/* Excerpt */}
         {post.excerpt && (
           <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontStyle: 'italic', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '2rem', borderLeft: '3px solid var(--burgundy)', paddingLeft: '1.2rem' }}>
             {post.excerpt}
           </p>
         )}
 
-        {/* Cover image */}
-        {post.image && (
+        {post.coverImage && (
           <div style={{ borderRadius: 'var(--card-radius)', overflow: 'hidden', marginBottom: '2.5rem', boxShadow: '0 4px 30px rgba(128,7,7,0.1)' }}>
             <img
-              src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${post.image}`}
+              src={urlFor(post.coverImage)}
               alt={post.title}
               style={{ width: '100%', maxHeight: '480px', objectFit: 'cover', display: 'block' }}
             />
           </div>
         )}
 
-        {/* Content */}
-        <div
-          className="post-content"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', lineHeight: 1.85, color: 'var(--charcoal)' }}>
+          {renderBody(post.body)}
+        </div>
       </article>
 
-      {/* Related posts */}
       {related && related.length > 0 && (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem 5rem', borderTop: '1px solid rgba(128,7,7,0.08)', paddingTop: '3rem' }}>
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700, color: 'var(--charcoal)', marginBottom: '1.5rem' }}>
@@ -82,16 +121,11 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
           </h2>
           <div className="related-grid">
             {related.map((p: any) => (
-              <Link key={p.id} href={`/stories/${p.id}`} style={{ textDecoration: 'none' }}>
+              <Link key={p._id} href={`/stories/${p.slug?.current}`} style={{ textDecoration: 'none' }}>
                 <div className="related-card">
                   <div style={{ height: 160, overflow: 'hidden', background: 'var(--cream-dark)' }}>
-                    {p.image ? (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${p.image}`}
-                        alt={p.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
-                        className="related-img"
-                      />
+                    {p.coverImage ? (
+                      <img src={urlFor(p.coverImage)} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} className="related-img" />
                     ) : (
                       <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--cream-dark), rgba(128,7,7,0.1))' }} />
                     )}
@@ -110,15 +144,6 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
       )}
 
       <style>{`
-        .post-content { font-family: 'DM Sans', sans-serif; font-size: 1rem; line-height: 1.85; color: var(--charcoal); }
-        .post-content p { margin-bottom: 1.4rem; }
-        .post-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 700; color: var(--charcoal); margin: 2rem 0 1rem; }
-        .post-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 700; color: var(--charcoal); margin: 1.5rem 0 0.75rem; }
-        .post-content img { width: 100%; border-radius: 10px; margin: 1.5rem 0; }
-        .post-content a { color: var(--burgundy); border-bottom: 1px solid var(--burgundy); }
-        .post-content ul, .post-content ol { padding-left: 1.5rem; margin-bottom: 1.4rem; }
-        .post-content li { margin-bottom: 0.4rem; }
-        .post-content blockquote { border-left: 3px solid var(--burgundy); padding-left: 1.2rem; font-style: italic; color: var(--muted); margin: 1.5rem 0; }
         .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
         .related-card { background: var(--white); border-radius: var(--card-radius); overflow: hidden; border: 1px solid rgba(128,7,7,0.07); box-shadow: 0 2px 14px rgba(128,7,7,0.05); transition: var(--transition); }
         .related-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(128,7,7,0.12); }

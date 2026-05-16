@@ -1,24 +1,32 @@
-import { sanityClient, urlFor } from '@/lib/sanity'
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { sanityClient, urlFor } from '@/lib/sanity'
 
-export const revalidate = 60
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'Post', label: 'Posts' },
+  { value: 'Interview', label: 'Interviews' },
+]
 
-async function getPosts() {
-  return await sanityClient.fetch(`
-    *[_type == "post"] | order(publishedAt desc) {
-      _id,
-      title,
-      excerpt,
-      category,
-      publishedAt,
-      slug,
-      coverImage
-    }
-  `)
-}
+export default function StoriesPage() {
+  const [allPosts, setAllPosts] = useState<any[]>([])
+  const [filter, setFilter] = useState('all')
+  const [loading, setLoading] = useState(true)
 
-export default async function StoriesPage() {
-  const posts = await getPosts()
+  useEffect(() => {
+    sanityClient.fetch(`
+      *[_type == "post"] | order(publishedAt desc) {
+        _id, title, excerpt, category, publishedAt, slug, coverImage
+      }
+    `).then(data => {
+      setAllPosts(data ?? [])
+      setLoading(false)
+    })
+  }, [])
+
+  const posts = filter === 'all' ? allPosts : allPosts.filter(p => p.category === filter)
   const featured = posts[0]
   const rest = posts.slice(1)
 
@@ -30,16 +38,49 @@ export default async function StoriesPage() {
           <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Stories</span>
           <div style={{ flex: 1, height: 1, background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap' as const, gap: '1rem' }}>
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap' as const, gap: '1rem' }}>
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1 }}>
             Fashion Stories
           </h1>
+
+          {/* Filter pills */}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {FILTERS.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setFilter(value)}
+                style={{
+                  padding: '0.4rem 1rem',
+                  border: '1.5px solid rgba(128,7,7,0.22)',
+                  borderRadius: 50,
+                  fontSize: '0.82rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'DM Sans, sans-serif',
+                  transition: 'all 0.2s',
+                  background: filter === value ? 'var(--burgundy)' : 'var(--cream)',
+                  color: filter === value ? 'white' : 'var(--muted)',
+                  borderColor: filter === value ? 'var(--burgundy)' : 'rgba(128,7,7,0.22)',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {posts.length === 0 ? (
+      {loading ? (
+        <div style={{ textAlign: 'center' as const, padding: '6rem 2rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
+          Loading stories…
+        </div>
+      ) : posts.length === 0 ? (
         <div style={{ textAlign: 'center' as const, padding: '6rem 2rem' }}>
-          <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No stories yet — check back soon.</p>
+          <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No stories in this category yet.</p>
+          <button onClick={() => setFilter('all')} style={{ marginTop: '1rem', padding: '0.7rem 1.8rem', background: 'var(--burgundy)', color: 'white', border: 'none', borderRadius: 50, fontSize: '0.85rem', cursor: 'pointer' }}>
+            View All
+          </button>
         </div>
       ) : (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem 5rem' }}>
@@ -81,7 +122,7 @@ export default async function StoriesPage() {
             </Link>
           )}
 
-          {/* Rest of posts */}
+          {/* Rest */}
           {rest.length > 0 && (
             <div className="posts-grid">
               {rest.map((post: any, i: number) => (
