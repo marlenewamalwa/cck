@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     checkout_request_id: `manual_${Date.now()}`,
     status: 'pending',
   })
-
+return NextResponse.json({ success: true, checkoutRequestId: `manual_${Date.now()}` })
     if (!phone || !brand_id) {
       return NextResponse.json({ error: 'Phone and brand_id required' }, { status: 400 })
     }
