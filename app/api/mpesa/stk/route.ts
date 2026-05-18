@@ -24,6 +24,14 @@ async function getAccessToken() {
 export async function POST(req: NextRequest) {
   try {
     const { phone, brand_id, amount = 1 } = await req.json()
+    // STK temporarily disabled — manual payments only
+  await supabase.from('payments').insert({
+    brand_id,
+    phone,
+    amount,
+    checkout_request_id: `manual_${Date.now()}`,
+    status: 'pending',
+  })
 
     if (!phone || !brand_id) {
       return NextResponse.json({ error: 'Phone and brand_id required' }, { status: 400 })
