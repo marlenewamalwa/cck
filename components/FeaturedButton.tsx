@@ -96,7 +96,7 @@ export default function FeaturedButton({ brandId, isFeatured }: { brandId: numbe
                     Check your phone and confirm the M-Pesa payment of <strong>KES 500</strong>. Your featured listing will activate automatically once confirmed.
                   </p>
                   <p style={{ fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.7, padding: '0.8rem 1rem', background: 'var(--cream)', borderRadius: 8 }}>
-                    Didn't receive a prompt? Manually send <strong>KES 500</strong> to Till No. <strong>3393634</strong> with your brand name as reference, then email <a href="mailto:hello@closetculture.co.ke" style={{ color: 'var(--burgundy)' }}>hello@closetculture.co.ke</a>
+                    Didn't receive a prompt? Manually send <strong>KES 500</strong> to Till No. <strong>3393634</strong> Name:<strong>Marlene Wamalwa</strong>  
                   </p>
                   <button onClick={close} style={{ marginTop: '1.2rem', padding: '0.7rem 2rem', background: 'var(--burgundy)', color: 'white', border: 'none', borderRadius: 50, fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer' }}>
                     Done
