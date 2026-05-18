@@ -71,13 +71,10 @@ export default function HomePage() {
       <section style={{ maxWidth: '1200px', margin: '5rem auto', padding: '0 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--burgundy)', display: 'inline-block' }} />
-          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Featured</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Featured Brands</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap' as const, gap: '1rem' }}>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1 }}>
-            Brands to Know
-          </h2>
           <Link href="/brands" style={{ fontSize: '0.82rem', color: 'var(--burgundy)', fontWeight: 500, borderBottom: '1px solid var(--burgundy)', textDecoration: 'none', paddingBottom: 2 }}>
             View all brands →
           </Link>
@@ -95,9 +92,6 @@ export default function HomePage() {
           <span style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--burgundy)' }}>Lookbook</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--burgundy)', opacity: 0.2 }} />
         </div>
-        <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--charcoal)', marginBottom: '2rem' }}>
-          Style Inspiration
-        </h2>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <PinterestBoard />
         </div>

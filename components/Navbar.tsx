@@ -115,6 +115,7 @@ export default function Navbar() {
               listStyle: 'none',
               gap: '20px',
               fontFamily: 'Cormorant Garamond, serif',
+              fontWeight: '40px',
               margin: 0,
               padding: 0,
             }}>
@@ -124,7 +125,7 @@ export default function Navbar() {
 ].map(({ href, label }) => (
   <li key={href}>
     <Link href={href} style={{
-      fontSize: '1rem', // increase from whatever it is
+      fontSize: '1.2rem', // increase from whatever it is
       color: pathname === href ? 'var(--burgundy)' : '#333',
       fontWeight: pathname === href ? '500' : '400',
       transition: 'color 0.3s',

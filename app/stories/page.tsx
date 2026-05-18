@@ -40,9 +40,7 @@ export default function StoriesPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap' as const, gap: '1rem' }}>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.4rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--charcoal)', lineHeight: 1.1 }}>
-            Fashion Stories
-          </h1>
+         
 
           {/* Filter pills */}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
