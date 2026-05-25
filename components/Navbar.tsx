@@ -122,6 +122,9 @@ export default function Navbar() {
              {[
   { href: '/brands', label: 'Brands' },
   { href: '/stories', label: 'Stories' },
+  { href: '/about', label: 'About Us' },
+   { href: '/contact', label: 'Contact Us' },
+    
 ].map(({ href, label }) => (
   <li key={href}>
     <Link href={href} style={{
